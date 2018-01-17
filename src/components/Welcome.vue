@@ -1,6 +1,6 @@
 <template>
-  <section class="welcome wrapper">
-    <div class="welcome__box">
+  <section class="welcome wrapper" v-bind:class="{ welcome_active: logoHover }">
+    <div class="welcome__box" @mouseover="logoHover = true" @mouseleave="logoHover = false">
       <span class="welcome__logo">
         <svg class="welcome__logoSvg welcome__logoSvg_back" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
           <path class="welcome__logoSvgBgLight" d="M535.7,435.1c-18.1,5.9-26.8,18.5-26,37.5c0.8,19.1-8.3,28.6-27.4,28.7
@@ -477,37 +477,52 @@
     </div>
 
     <div class="welcome__bubbles">
-      <div id="bubbleBack" class="welcome__bubBack">
-        <div class="bubble bubble_lg"></div>
-        <div class="bubble bubble_lg"></div>
-        <div class="bubble bubble_lg"></div>
-        <div class="bubble bubble_md"></div>
-        <div class="bubble bubble_md"></div>
-        <div class="bubble bubble_sm"></div>
-        <div class="bubble bubble_sm"></div>
-        <div class="bubble bubble_sm"></div>
-      </div>
-      <div class="welcome__bubMiddle"></div>
-      <div class="welcome__bubFront"></div>
+      <div class="bubble bubble_lg"></div>
+      <div class="bubble bubble_lg"></div>
+      <div class="bubble bubble_md"></div>
+      <div class="bubble bubble_md"></div>
+      <div class="bubble bubble_md"></div>
+      <div class="bubble bubble_sm"></div>
+      <div class="bubble bubble_sm"></div>
+      <div class="bubble bubble_sm"></div>
     </div>
   </section>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'Welcome',
   data () {
     return {
       title: {
         names: 'Vitalii & Viktoria',
         text: 'web design & development'
-      }
+      },
+      logoHover: false
     }
   },
   mounted () {
-    $('.bubble').each(function( i, el ) {
-      debugger
-    })
+    let bubbles = document.getElementsByClassName('bubble')
+    let animationWidth = window.innerWidth
+    let animationHeight = window.innerHeight
+
+    let maxPositionWidth = animationWidth * 0.001
+    let maxPositionHeight = animationHeight * 0.001
+
+    for (let i = 0; i < bubbles.length; i++) {
+      let duration = (Math.random() * (0.2 - 0.07) + 0.07).toFixed(3)
+      let topPosition = (Math.random() * (maxPositionHeight - 0.001) + 0.001).toFixed(4)
+      let leftPosition = (Math.random() * (maxPositionWidth - 0.001) + 0.001).toFixed(4)
+
+      bubbles[i].style.top = topPosition * 100 + 'rem'
+      bubbles[i].style.left = leftPosition * 100 + 'rem'
+      bubbles[i].style.animationDuration = duration * 1000 + 's'
+      bubbles[i].style.animationDelay = duration * 10 + 's'
+      bubbles[i].style.filter = 'blur(' + (Math.random() * (0.4 - 0) + 0).toFixed(1) + 'rem)'
+    }
+  },
+
+  methods: {
   }
 }
 </script>
@@ -522,18 +537,33 @@ export default {
     flex-direction: column;
     justify-content: center;
     text-align: center;
+    // &_active {
+    //   animation: moveBG 30s ease infinite;
+    //   background: linear-gradient(230deg,#efcfff,#a5c4ff,#abf8ff);
+    //   background-size: 300% 300%;
+    //   transition: background linear 3s linear;
+    // }
 
     &__box {
       position: relative;
       z-index: 999;
       width: 30rem;
       margin: -7rem auto 0;
+      cursor: pointer;
+
+      &:hover {
+        .welcome__logo {
+          transform: scale(1.03);
+        }
+      }
     }
 
     &__logo {
       display: block;
       position: relative;
       overflow: hidden;
+      transition: transform .3s linear;
+      margin: 0 0 1.2rem;
       filter: drop-shadow(0 .2rem .2rem #888);
     }
     &__logoSvg {
@@ -542,13 +572,19 @@ export default {
       left: 0;
       top: 0;
       fill: #121212;
+      transition: all .3s linear;
 
       &_back {
         position: relative;
-        animation: rotation 88s infinite linear;
+
+        .welcome_active & {
+          animation: rotation 88s infinite linear;
+        }
       }
       &_backNext {
-        animation: backRotation 77s infinite linear;
+        .welcome_active & {
+          animation: backRotation 77s infinite linear;
+        }
       }
       &_backNextOne {
         animation: rotation 68s infinite linear;
@@ -583,7 +619,6 @@ export default {
       top: 0;
       width: 100%;
       height: 100%;
-      filter: blur(.5rem);
     }
   }
 
@@ -592,18 +627,40 @@ export default {
     border-radius: 100%;
     background-color: #fff;
     position: absolute;
+    // animation-name: moveBubble;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+
+    &:before, &:after {
+      content: '';
+      display: block;
+      background-color: #fff;
+      border-radius: 100%
+    }
+    &:before {
+      transform: translate(800%, 100%);
+      filter: blur(.1rem);
+      width: 90%;
+      height: 90%;
+    }
+    &:after {
+      transform: translate(-100%, -800%);
+      width: 120%;
+      height: 120%;
+      filter: blur(0);
+    }
 
     &_lg {
-      width: 10rem;
-      height: 10rem;
+      width: 16.8rem;
+      height: 16.8rem;
     }
     &_md {
-      width: 7rem;
-      height: 7rem;
+      width: 9.8rem;
+      height: 9.8rem;
     }
     &_sm {
-      width: 5rem;
-      height: 5rem;
+      width: 3.8rem;
+      height: 3.8rem;
     }
   }
 
@@ -622,5 +679,25 @@ export default {
     to {
       transform: rotate(-359deg);
     }
+  }
+
+  @keyframes moveBubble {
+    0% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-600%, -1000%);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+  // animation: moveBG 30s ease infinite;
+
+  @keyframes moveBG {
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
   }
 </style>
