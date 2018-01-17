@@ -1,0 +1,28 @@
+// -------------------------------------
+// Base Styles file
+// -------------------------------------
+
+@import 'variables';
+
+@import url('https://fonts.googleapis.com/css?family=Martel:200,300,400,600,700,800,900|Open+Sans:300,400,600,700');
+
+html {
+    height: 100%;
+    font-size: 62.5%;
+}
+body {
+    height: 100%;
+    font-size: 1.4rem;
+    font-family: $baseFontFamily;
+}
+.app {
+    height: 100%;
+}
+.wrapper {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+}
+
