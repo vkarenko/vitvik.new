@@ -1,7 +1,7 @@
 <template>
-  <div class="welcome" v-bind:class="{ welcome_active: logoHover }">
-    <section class="welcome__intro">
-      <div class="welcome__box" @mouseover="logoHover = true" @mouseleave="logoHover = false">
+  <div class="welcome">
+    <section id="welcomeIntro" class="welcome__intro" v-bind:class="{ welcome__intro_active: logoHover }">
+      <a href="#welcomeAbout" v-smooth-scroll="{ duration: 2000 }" class="welcome__box" @mouseover="logoHover = true" @mouseleave="logoHover = false">
         <span class="welcome__logo">
           <svg class="welcome__logoSvg welcome__logoSvg_back" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
             <path class="welcome__logoSvgBgLight" d="M535.7,435.1c-18.1,5.9-26.8,18.5-26,37.5c0.8,19.1-8.3,28.6-27.4,28.7
@@ -475,29 +475,30 @@
           <span class="welcome__headingNames">{{ title.names }}</span>
           <span>{{ title.text }}</span>
         </h1>
-      </div>
+      </a>
 
-      <div class="welcome__bubbles">
-        <div class="bubble bubble_lg"></div>
-        <div class="bubble bubble_lg"></div>
-        <div class="bubble bubble_md"></div>
-        <div class="bubble bubble_md"></div>
-        <div class="bubble bubble_md"></div>
-        <div class="bubble bubble_sm"></div>
-        <div class="bubble bubble_sm"></div>
-        <div class="bubble bubble_sm"></div>
-      </div>
+      <bubbles v-if="bubleStatus"></bubbles>
     </section>
 
     <section id="welcomeAbout" class="welcome__about">
-
+      <div class="about container-fluid">
+        <div class="row">
+          <about-vitalii class="about__box col-md-6"></about-vitalii>
+          <about-vika class="about__box col-md-6"></about-vika>
+        </div>
+      </div>
     </section>
   </div>
 </template>
 
 <script>
+import Bubbles from '@/components/welcome/Bubbles'
+import AboutVitalii from '@/components/welcome/AboutVitalii'
+import AboutVika from '@/components/welcome/AboutVika'
+
 export default {
   name: 'Welcome',
+  components: {Bubbles, AboutVitalii, AboutVika},
   data () {
     return {
       title: {
@@ -505,76 +506,53 @@ export default {
         text: 'web design & development'
       },
       logoHover: false,
-      activateAbout: false
+      bubleStatus: true
     }
   },
 
   methods: {
     onScroll: function (event) {
-      let scrollDirection = this.detectMouseWheelDirection(event)
-
-      this.activateAbout = (scrollDirection === 'down')
+      this.toggleBubbles()
     },
 
-    detectMouseWheelDirection: function (e) {
-      var delta = null
-      var direction = false
-      if (!e) {
-        e = window.event
-      }
+    toggleBubbles: function () {
+      let intro = document.getElementById('welcomeIntro')
+      let introHeight = intro.offsetHeight
+      let bottomPosition = introHeight
 
-      if (e.wheelDelta) {
-        delta = e.wheelDelta / 60
-      } else if (e.detail) {
-        // fallback for FireFox
-        delta = -e.detail / 2
+      if (bottomPosition === window.scrollY || bottomPosition < window.scrollY) {
+        this.bubleStatus = false
+      } else {
+        this.bubleStatus = true
       }
-
-      if (delta !== null) {
-        direction = delta > 0 ? 'up' : 'down'
-      }
-      return direction
     }
   },
 
   mounted () {
-    let bubbles = document.getElementsByClassName('bubble')
-    let animationWidth = window.innerWidth
-    let animationHeight = window.innerHeight
-
-    let maxPositionWidth = animationWidth * 0.001
-    let maxPositionHeight = animationHeight * 0.001
-
-    for (let i = 0; i < bubbles.length; i++) {
-      let duration = (Math.random() * (0.2 - 0.07) + 0.07).toFixed(3)
-      let topPosition = (Math.random() * (maxPositionHeight - 0.001) + 0.001).toFixed(4)
-      let leftPosition = (Math.random() * (maxPositionWidth - 0.001) + 0.001).toFixed(4)
-
-      bubbles[i].style.top = topPosition * 100 + 'rem'
-      bubbles[i].style.left = leftPosition * 100 + 'rem'
-      bubbles[i].style.animationDuration = duration * 1000 + 's'
-      bubbles[i].style.animationDelay = duration * 10 + 's'
-      bubbles[i].style.filter = 'blur(' + (Math.random() * (0.4 - 0) + 0).toFixed(1) + 'rem)'
-    }
   },
 
   created: function () {
-    window.addEventListener('wheel', this.onScroll)
+    window.addEventListener('scroll', this.onScroll)
+
+    // move to top when initiated
+    window.onbeforeunload = function () {
+      window.scrollTo(0, 0)
+    }
   },
 
   destroyed: function () {
-    window.removeEventListener('wheel', this.onScroll)
+    window.removeEventListener('scroll', this.onScroll)
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-  @import '../scss/variables';
+  @import '../../scss/variables';
+  @import '../../scss/mixins';
 
   .welcome {
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
     // &_active {
     //   animation: moveBG 30s ease infinite;
     //   background: linear-gradient(230deg,#efcfff,#a5c4ff,#abf8ff);
@@ -583,22 +561,25 @@ export default {
     // }
 
     &__intro {
-      height: 100%;
-      background-color: #f2f2f2;
+      min-height: 100%;
+      height: auto;
+      overflow: hidden;
+      background-color: $concrete;
       display: flex;
       flex-direction: column;
       justify-content: center;
       text-align: center;
-      border: .8rem solid #fff;
+      border: .8rem solid $white;
+      transition: all .6s linear;
+
+      &_active {
+        background-color: $white;
+        border: .8rem solid $concrete;
+      }
     }
     &__about {
-      background: red;
-      position: absolute;
-      top: 100%;
+      background: $white;
       min-height: 100%;
-      height: auto !important;
-      height: 100%;
-      width: 100%;
       transition: top .8s linear;
     }
 
@@ -606,8 +587,15 @@ export default {
       position: relative;
       z-index: 999;
       width: 30rem;
-      margin: -7rem auto 0;
       cursor: pointer;
+      color: $baseFontColor;
+      text-decoration: none;
+      margin: 0 auto;
+      padding: 2rem 0;
+
+      @media screen and (min-height: 600px) {
+        margin-top: -7rem;
+      }
 
       &:hover {
         .welcome__logo {
@@ -629,7 +617,7 @@ export default {
       display: block;
       left: 0;
       top: 0;
-      fill: #121212;
+      fill: $baseFontColor;
       transition: all .3s linear;
 
       &_back {
@@ -644,14 +632,14 @@ export default {
       }
     }
     &__logoSvgBgLight {
-      fill: #fff;
+      fill: $white;
     }
     &__logoSvgBg {
-      fill: #f1f1f1;
+      fill: $concrete;
       transition: all .1s linear;
 
-      .welcome_active & {
-        fill: #fff;
+      .welcome__intro_active & {
+        fill: $white;
       }
     }
 
@@ -682,48 +670,6 @@ export default {
     }
   }
 
-  // Bubbles
-  .bubble {
-    border-radius: 100%;
-    background-color: #fff;
-    position: absolute;
-    // animation-name: moveBubble;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-in-out;
-
-    &:before, &:after {
-      content: '';
-      display: block;
-      background-color: #fff;
-      border-radius: 100%
-    }
-    &:before {
-      transform: translate(800%, 100%);
-      filter: blur(.1rem);
-      width: 90%;
-      height: 90%;
-    }
-    &:after {
-      transform: translate(-100%, -800%);
-      width: 120%;
-      height: 120%;
-      filter: blur(0);
-    }
-
-    &_lg {
-      width: 16.8rem;
-      height: 16.8rem;
-    }
-    &_md {
-      width: 9.8rem;
-      height: 9.8rem;
-    }
-    &_sm {
-      width: 3.8rem;
-      height: 3.8rem;
-    }
-  }
-
   @keyframes rotation {
     from {
       transform: rotate(0deg);
@@ -744,25 +690,5 @@ export default {
     to {
       transform: rotate(0deg);
     }
-  }
-
-  @keyframes moveBubble {
-    0% {
-      transform: translate(0, 0);
-    }
-    50% {
-      transform: translate(-600%, -1000%);
-    }
-    100% {
-      transform: translate(0, 0);
-    }
-  }
-
-  // animation: moveBG 30s ease infinite;
-
-  @keyframes moveBG {
-      0%{background-position:0% 50%}
-      50%{background-position:100% 50%}
-      100%{background-position:0% 50%}
   }
 </style>
